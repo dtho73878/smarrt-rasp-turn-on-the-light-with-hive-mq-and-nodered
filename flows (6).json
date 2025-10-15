@@ -1,0 +1,5178 @@
+[
+    {
+        "id": "36b437ff56e6752c",
+        "type": "tab",
+        "label": "Tuya Cloud API",
+        "disabled": false,
+        "info": "\r\n# Tuya Cloud API for beginners\r\n\r\nThis project explains how to work with Tuya Cloud API and how to use Postman to develop REST request for NodeRED \r\nThanks to James Wilson for udating the flow to match latest authtentication requirement\r\n\r\n\r\n![Logo](https://notenoughtech.com/wp-content/uploads/2021/07/2021-07-12-23_35_30-Brand-Logo-Guidelines-Video-v2.0.0_0817.pdf-Personal-Microsoft%E2%80%8B-Edge.jpg)\r\n\r\n    \r\n## Features\r\n\r\n- Authentication\r\n- Get device list\r\n- Get status and data points\r\n- Issue commands\r\n\r\n  \r\n## Documentation\r\n\r\n[Documentation](https://linktodocumentation)\r\n\r\n  \r\n## More on\r\n\r\nVisit my page and the [article](https://notenoughtech.com/home-automation/tuya-cloud-api/) covering this topic.\r\n\r\n  \r\n## Appendix\r\n\r\nPostman, Tuya Cloud API\r\n  \r\n## 🔗 Follow my work\r\n[![Twitter Follow](https://img.shields.io/twitter/follow/notenoughtech?label=%40notenoughtech&logo=twitter&style=for-the-badge)](https://twitter.com/NotEnoughTECH)\r\n[![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UC7V__uBIaZotHn_smHJShGQ?label=NotEnoughTech&logo=YouTube&logoColor=red&style=for-the-badge)](https://www.youtube.com/channel/UC7V__uBIaZotHn_smHJShGQ)\r\n[![Subreddit subscribers](https://img.shields.io/reddit/subreddit-subscribers/not_enough_tech?logo=reddit&logoColor=white&style=for-the-badge)](https://www.reddit.com/r/Not_Enough_Tech/)",
+        "env": []
+    },
+    {
+        "id": "8acfbc09258734ca",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id3\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n //msg.payload = '';\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 2860,
+        "wires": [
+            [
+                "4b3cc34a1cb1e490"
+            ]
+        ]
+    },
+    {
+        "id": "4b3cc34a1cb1e490",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 950,
+        "y": 2860,
+        "wires": [
+            [
+                "3fbfe64696789a48",
+                "2a0e71cc357f67c9"
+            ]
+        ]
+    },
+    {
+        "id": "f5da854c0cfeba42",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id3\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 2860,
+        "wires": [
+            [
+                "0daf69ddea201997"
+            ]
+        ]
+    },
+    {
+        "id": "0daf69ddea201997",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 590,
+        "y": 2860,
+        "wires": [
+            [
+                "8acfbc09258734ca"
+            ]
+        ]
+    },
+    {
+        "id": "3c8dbd9ad1184e66",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "3",
+        "topic": "",
+        "x": 150,
+        "y": 3000,
+        "wires": [
+            [
+                "f5da854c0cfeba42",
+                "e202ebd8d264610b",
+                "641583d91a21fd5d",
+                "4882b5dcf6d3c947",
+                "e545fe1549028d45"
+            ]
+        ]
+    },
+    {
+        "id": "2a0e71cc357f67c9",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "345",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 1110,
+        "y": 2820,
+        "wires": []
+    },
+    {
+        "id": "99f76914101a2e15",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "function 2",
+        "func": "let payload1 = msg.payload; // Giá trị của payload1\nlet payload2 = \"name: T.F:2.R:3\"; // Giá trị của payload2\n// Kết hợp dữ liệu thành một chuỗi không có dấu {}\nmsg.payload = `${payload1}\\n${payload2}`; // Mỗi nội dung trên một dòng\n\nreturn msg; ",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1540,
+        "y": 2820,
+        "wires": [
+            [
+                "6bed6bf4b9bf1d59"
+            ]
+        ]
+    },
+    {
+        "id": "bf91bb2af7f40207",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "ĐẾM ĐỦ 4 LẦN >40 ĐỘ",
+        "func": "// Lấy counter cũ (mặc định 0)\nlet count = context.get('count') || 0;\n\n// Nếu payload bằng 0 thì tăng counter, ngược lại reset về 0\nif (msg.payload >400) {\n  count++;\n} else {\n  count = 0;\n}\n\n// Lưu lại counter\ncontext.set('count', count);\n\n// Chỉ khi đủ 4 lần liên tiếp thì phát msg\nif (count >= 4) {\n  context.set('count', 0);  // reset để chờ đợt sau\n  return msg;\n}\n\n// Chưa đủ 5 lần thì dừng dòng chảy\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2010,
+        "y": 2860,
+        "wires": [
+            [
+                "d1c84619072224e7"
+            ]
+        ]
+    },
+    {
+        "id": "6bed6bf4b9bf1d59",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "server/esp8266T",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 1730,
+        "y": 2820,
+        "wires": []
+    },
+    {
+        "id": "6872e99c46bc5d26",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n //msg.payload = '';\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 3020,
+        "wires": [
+            [
+                "fadb01a1884e7653"
+            ]
+        ]
+    },
+    {
+        "id": "b0c966c6edd90aeb",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 850,
+        "y": 3080,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e202ebd8d264610b",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 3020,
+        "wires": [
+            [
+                "54c5f1b9bf51f050"
+            ]
+        ]
+    },
+    {
+        "id": "54c5f1b9bf51f050",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 590,
+        "y": 3020,
+        "wires": [
+            [
+                "6872e99c46bc5d26"
+            ]
+        ]
+    },
+    {
+        "id": "791eed2d787ee851",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "123",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 950,
+        "y": 2960,
+        "wires": []
+    },
+    {
+        "id": "f73179512d2cf775",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "ĐẾM ĐỦ 4 LẦN >20(KHÓI) ",
+        "func": "// Lấy counter cũ (mặc định 0)\nlet count = context.get('count')||0;\n\n// Nếu payload > 20 thì tăng, ngược lại reset\nif (msg.payload > 20) {\n  count++;\n} else {\n  count = 0;\n}\n\n// Lưu lại counter\ncontext.set('count', count);\n\n// Chỉ khi đủ 4 lần liên tiếp thì phát msg\nif (count >= 4) {\n  // reset để chờ lần sau\n  context.set('count', 0);\n  return msg;\n}\n\n// Chưa đủ 5 lần thì dừng dòng chảy\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1980,
+        "y": 3020,
+        "wires": [
+            [
+                "d1c84619072224e7"
+            ]
+        ]
+    },
+    {
+        "id": "7d76d71661f9448e",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.result[1].value",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1160,
+        "y": 3020,
+        "wires": [
+            [
+                "2991abab4d2ff625",
+                "f73179512d2cf775",
+                "464651cab55d563b",
+                "9b081fc4808867f9",
+                "b5727e2760dd0398"
+            ]
+        ]
+    },
+    {
+        "id": "3fbfe64696789a48",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.result[0].value",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1200,
+        "y": 2860,
+        "wires": [
+            [
+                "0007ba98bae816e3",
+                "99f76914101a2e15",
+                "bf91bb2af7f40207",
+                "eb3a61f5a0d2d157",
+                "ef961e1f5f6de30e"
+            ]
+        ]
+    },
+    {
+        "id": "ccbf0a4a7bdbbc75",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "LẤY GIÁ TRỊ CẢM  BIẾN KHÓI",
+        "info": "",
+        "x": 420,
+        "y": 2960,
+        "wires": []
+    },
+    {
+        "id": "267ca1b86509364a",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "LẤY GIÁ TRỊ CẢM BIẾN NHIỆT ĐỘ",
+        "info": "",
+        "x": 420,
+        "y": 2800,
+        "wires": []
+    },
+    {
+        "id": "b150c9a51cf56b07",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id4\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n //msg.payload = '';\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 800,
+        "y": 3200,
+        "wires": [
+            [
+                "ce56790567a1b6ee"
+            ]
+        ]
+    },
+    {
+        "id": "641583d91a21fd5d",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id4\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 3200,
+        "wires": [
+            [
+                "ba781ff754a5992a"
+            ]
+        ]
+    },
+    {
+        "id": "ba781ff754a5992a",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 590,
+        "y": 3200,
+        "wires": [
+            [
+                "b150c9a51cf56b07"
+            ]
+        ]
+    },
+    {
+        "id": "fdf69163056f0192",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "567",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 1150,
+        "y": 3160,
+        "wires": []
+    },
+    {
+        "id": "0446395d49f302a3",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "LẤY GIÁ TRỊ CẢM GAS",
+        "info": "",
+        "x": 400,
+        "y": 3160,
+        "wires": []
+    },
+    {
+        "id": "6829af272982949a",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.result[3].value",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1240,
+        "y": 3200,
+        "wires": [
+            [
+                "16ab18bb30deabf5",
+                "c2fcb861555a61a6",
+                "731aec43a715ec13",
+                "6b5d5d8b6f4f2b98",
+                "a15a6ee2c1160e39",
+                "7f3513c45253a1f3"
+            ]
+        ]
+    },
+    {
+        "id": "731aec43a715ec13",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "ĐẾM ĐỦ 4 LẦN >20(GAS) ",
+        "func": "// Lấy counter cũ (mặc định 0)\nlet count = context.get('count')||0;\n\n// Nếu payload > 20 thì tăng, ngược lại reset\nif (msg.payload > 20) {\n  count++;\n} else {\n  count = 0;\n}\n\n// Lưu lại counter\ncontext.set('count', count);\n\n// Chỉ khi đủ 4 lần liên tiếp thì phát msg\nif (count >= 4) {\n  // reset để chờ lần sau\n  context.set('count', 0);\n  return msg;\n}\n\n// Chưa đủ 5 lần thì dừng dòng chảy\nreturn null;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1980,
+        "y": 3200,
+        "wires": [
+            [
+                "d1c84619072224e7"
+            ]
+        ]
+    },
+    {
+        "id": "e6b0a1ab802e4412",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id2\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\" + device_id +\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n msg.payload = '';\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 2040,
+        "wires": [
+            [
+                "e99df121b7f580db"
+            ]
+        ]
+    },
+    {
+        "id": "e99df121b7f580db",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 770,
+        "y": 2040,
+        "wires": [
+            [
+                "c688c599e7774818"
+            ]
+        ]
+    },
+    {
+        "id": "4882b5dcf6d3c947",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id2\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\" + device_id +\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 200,
+        "y": 2040,
+        "wires": [
+            [
+                "5b8794e8e14b6880"
+            ]
+        ]
+    },
+    {
+        "id": "5b8794e8e14b6880",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 430,
+        "y": 2040,
+        "wires": [
+            [
+                "e6b0a1ab802e4412"
+            ]
+        ]
+    },
+    {
+        "id": "e9ffe9b6578e3cda",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "TRẠNG THÁI CHUÔNG BÁO ĐỘNG",
+        "info": "",
+        "x": 240,
+        "y": 1980,
+        "wires": []
+    },
+    {
+        "id": "c688c599e7774818",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.result[0].value",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 2040,
+        "wires": [
+            [
+                "4c4deceae0270184"
+            ]
+        ]
+    },
+    {
+        "id": "c898b6b26f9add34",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "app/CHUONG",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 1400,
+        "y": 2040,
+        "wires": []
+    },
+    {
+        "id": "4c4deceae0270184",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Gửi trạng thái Chuông",
+        "func": "if (msg.payload === \"disarmed\") {\n    msg.payload = \"Im lặng\";\n} else {\n    msg.payload = \"Cảnh báo phát hiện sự cố\";\n}\nmsg.payload = msg.payload;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1180,
+        "y": 2040,
+        "wires": [
+            [
+                "c898b6b26f9add34"
+            ]
+        ]
+    },
+    {
+        "id": "0007ba98bae816e3",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "1",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 1370,
+        "y": 2820,
+        "wires": []
+    },
+    {
+        "id": "2991abab4d2ff625",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "2",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 1190,
+        "y": 2960,
+        "wires": []
+    },
+    {
+        "id": "16ab18bb30deabf5",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "3",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 1370,
+        "y": 3140,
+        "wires": []
+    },
+    {
+        "id": "46267d12cc285080",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "3",
+        "topic": "",
+        "x": 2290,
+        "y": 2820,
+        "wires": [
+            [
+                "d1c84619072224e7"
+            ]
+        ]
+    },
+    {
+        "id": "1f38060ee95d92f0",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "GỬI TRẠNG THÁI CHUÔNG LÊN APP",
+        "info": "",
+        "x": 1650,
+        "y": 2040,
+        "wires": []
+    },
+    {
+        "id": "8baae0947fbcb3dd",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "gửi dữ liệu cảm biển nhiêt độ để RPI xử lý",
+        "info": "",
+        "x": 1000,
+        "y": 2780,
+        "wires": []
+    },
+    {
+        "id": "bd94a94ee82ea87b",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "gửi giá trị nhiệt độ lên app",
+        "info": "",
+        "x": 1430,
+        "y": 2780,
+        "wires": []
+    },
+    {
+        "id": "a7b3e264fa897a13",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "gửi  giá trị nhiệt độ lên sever để esp đọc",
+        "info": "",
+        "x": 1750,
+        "y": 2780,
+        "wires": []
+    },
+    {
+        "id": "afc6674c68b7dc5c",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "gửi dữ liệu cảm biển khói để RPI xử lý",
+        "info": "",
+        "x": 850,
+        "y": 2920,
+        "wires": []
+    },
+    {
+        "id": "3b704b09a190559f",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "gửi  giá trị cảm biến khói lên app",
+        "info": "",
+        "x": 1170,
+        "y": 2920,
+        "wires": []
+    },
+    {
+        "id": "dd18601d87be0b4b",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "app/CB",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 1400,
+        "y": 1900,
+        "wires": []
+    },
+    {
+        "id": "c3af8d76768df08a",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id1\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n    msg.payload = { \n      \"status_value\": \"Trang thai\" };\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 600,
+        "y": 1900,
+        "wires": [
+            [
+                "78050f2eb0aa075d"
+            ]
+        ]
+    },
+    {
+        "id": "78050f2eb0aa075d",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 770,
+        "y": 1900,
+        "wires": [
+            [
+                "ca9f6698f8a455ac"
+            ]
+        ]
+    },
+    {
+        "id": "e545fe1549028d45",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id1\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 1900,
+        "wires": [
+            [
+                "e7d6ad93d3e03cdd"
+            ]
+        ]
+    },
+    {
+        "id": "e7d6ad93d3e03cdd",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 390,
+        "y": 1900,
+        "wires": [
+            [
+                "c3af8d76768df08a"
+            ]
+        ]
+    },
+    {
+        "id": "a9af704b7c16d225",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "TRẠNG THÁI CB",
+        "info": "",
+        "x": 180,
+        "y": 1860,
+        "wires": []
+    },
+    {
+        "id": "ede7edbd4dee412b",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Gửi trạng thái CB",
+        "func": "if (msg.payload === true) {\n    msg.payload = \"ON\";\n} else {\n    msg.payload = \"OFF\";\n}\nmsg.payload = \"CB: \" + msg.payload;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1150,
+        "y": 1900,
+        "wires": [
+            [
+                "dd18601d87be0b4b",
+                "61e689db10974bb4"
+            ]
+        ]
+    },
+    {
+        "id": "ca9f6698f8a455ac",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.result[0].value",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 1900,
+        "wires": [
+            [
+                "ede7edbd4dee412b"
+            ]
+        ]
+    },
+    {
+        "id": "51257514c2016745",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "gửi dữ liệuc ảm biến   gas để raspberry xử lý",
+        "info": "",
+        "x": 910,
+        "y": 3140,
+        "wires": []
+    },
+    {
+        "id": "103fdb8583124033",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "gửi giá trị cảm biến gas lên  app",
+        "info": "",
+        "x": 1350,
+        "y": 3100,
+        "wires": []
+    },
+    {
+        "id": "61e689db10974bb4",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "server/esp8266CB",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 1410,
+        "y": 1840,
+        "wires": []
+    },
+    {
+        "id": "ce56790567a1b6ee",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 970,
+        "y": 3200,
+        "wires": [
+            [
+                "fdf69163056f0192",
+                "6829af272982949a"
+            ]
+        ]
+    },
+    {
+        "id": "fadb01a1884e7653",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 950,
+        "y": 3020,
+        "wires": [
+            [
+                "791eed2d787ee851",
+                "7d76d71661f9448e"
+            ]
+        ]
+    },
+    {
+        "id": "c43970dca4281678",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id2\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\" + device_id +\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n msg.payload = '';\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 740,
+        "y": 7300,
+        "wires": [
+            [
+                "e0aebadcba3a454b"
+            ]
+        ]
+    },
+    {
+        "id": "e0aebadcba3a454b",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 910,
+        "y": 7300,
+        "wires": [
+            [
+                "3514ba528eb3d69b"
+            ]
+        ]
+    },
+    {
+        "id": "f5473cf07aa65d47",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "d": true,
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 110,
+        "y": 7300,
+        "wires": [
+            [
+                "f6861a69170bdade"
+            ]
+        ]
+    },
+    {
+        "id": "f6861a69170bdade",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id2\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\" + device_id +\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 280,
+        "y": 7300,
+        "wires": [
+            [
+                "78052ee71c01867c"
+            ]
+        ]
+    },
+    {
+        "id": "78052ee71c01867c",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 510,
+        "y": 7300,
+        "wires": [
+            [
+                "c43970dca4281678"
+            ]
+        ]
+    },
+    {
+        "id": "22a090e56ba3793e",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Get Status Of Device \"Siren Alarm\"",
+        "info": "",
+        "x": 180,
+        "y": 7260,
+        "wires": []
+    },
+    {
+        "id": "3514ba528eb3d69b",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 9",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1080,
+        "y": 7300,
+        "wires": []
+    },
+    {
+        "id": "1c9dccc4745c8938",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Turn Device On Circuit breaker",
+        "info": "",
+        "x": 170,
+        "y": 7380,
+        "wires": []
+    },
+    {
+        "id": "dd27ffeca3bdf1f3",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id1\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar sign = msg.payload;\n\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : access_token,\n },\n    msg.payload = '{\"commands\":[{\"code\":\"switch_1\",\"value\":true}]}';\n msg.url = url;\n msg.method = \"POST\";\n //msg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 7420,
+        "wires": [
+            [
+                "daff647f187bf488"
+            ]
+        ]
+    },
+    {
+        "id": "daff647f187bf488",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1050,
+        "y": 7420,
+        "wires": [
+            [
+                "74446fb2f65e2589"
+            ]
+        ]
+    },
+    {
+        "id": "14c4059efbb443c3",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id1\");\nvar hashed_size = msg.payload;\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"POST\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar content_hash = hashed_size;\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 7420,
+        "wires": [
+            [
+                "c61068d7eb51c463"
+            ]
+        ]
+    },
+    {
+        "id": "c61068d7eb51c463",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 710,
+        "y": 7420,
+        "wires": [
+            [
+                "dd27ffeca3bdf1f3"
+            ]
+        ]
+    },
+    {
+        "id": "c4f5d6cbd6ac7c6a",
+        "type": "digest",
+        "z": "36b437ff56e6752c",
+        "name": "Hash the body data",
+        "algorithm": "SHA256",
+        "x": 270,
+        "y": 7420,
+        "wires": [
+            [
+                "14c4059efbb443c3"
+            ]
+        ]
+    },
+    {
+        "id": "74446fb2f65e2589",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 7",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1220,
+        "y": 7420,
+        "wires": []
+    },
+    {
+        "id": "c93ac22356db99e0",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Turn Device Off Circuit breaker",
+        "info": "",
+        "x": 190,
+        "y": 7480,
+        "wires": []
+    },
+    {
+        "id": "dfa0c7156887f8ed",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id1\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar sign = msg.payload;\n\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : access_token,\n },\n msg.payload = '{\"commands\":[{\"code\":\"switch_1\",\"value\":false}]}';\n msg.url = url;\n msg.method = \"POST\";\n //msg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 7540,
+        "wires": [
+            [
+                "d93b2e4b949a42fa"
+            ]
+        ]
+    },
+    {
+        "id": "d93b2e4b949a42fa",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1050,
+        "y": 7540,
+        "wires": [
+            [
+                "63fb7a1d3c7080c9"
+            ]
+        ]
+    },
+    {
+        "id": "b8e15785b191ec10",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id1\");\nvar hashed_size = msg.payload;\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"POST\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar content_hash = hashed_size;\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 7540,
+        "wires": [
+            [
+                "038d26a70e5ca2b7"
+            ]
+        ]
+    },
+    {
+        "id": "038d26a70e5ca2b7",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 710,
+        "y": 7540,
+        "wires": [
+            [
+                "dfa0c7156887f8ed"
+            ]
+        ]
+    },
+    {
+        "id": "c5f9bd207afa9600",
+        "type": "digest",
+        "z": "36b437ff56e6752c",
+        "name": "Hash the body data",
+        "algorithm": "SHA256",
+        "x": 270,
+        "y": 7540,
+        "wires": [
+            [
+                "b8e15785b191ec10"
+            ]
+        ]
+    },
+    {
+        "id": "63fb7a1d3c7080c9",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 10",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1220,
+        "y": 7540,
+        "wires": []
+    },
+    {
+        "id": "29a6a1738216d95a",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Turn Device Off  MSOKE- DITECTOR",
+        "info": "",
+        "x": 190,
+        "y": 7740,
+        "wires": []
+    },
+    {
+        "id": "a22b98fc9c3b5ff9",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar sign = msg.payload;\n\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : access_token,\n },\n msg.payload = '{\"commands\":[{\"code\":\"muffling\",\"value\":true}]}';\n msg.url = url;\n msg.method = \"POST\";\n //msg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 900,
+        "y": 7780,
+        "wires": [
+            [
+                "2d3955e88f35349f"
+            ]
+        ]
+    },
+    {
+        "id": "2d3955e88f35349f",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1050,
+        "y": 7780,
+        "wires": [
+            [
+                "d1789a2bb6932fcf"
+            ]
+        ]
+    },
+    {
+        "id": "b956964be29cb567",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "d": true,
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"commands\":[{\"code\":\"muffling\",\"value\":true}]}",
+        "payloadType": "str",
+        "x": 110,
+        "y": 7780,
+        "wires": [
+            [
+                "64e4ff0878c8478c"
+            ]
+        ]
+    },
+    {
+        "id": "6574cfa36110f50b",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id\");\nvar hashed_size = msg.payload;\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"POST\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar content_hash = hashed_size;\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 480,
+        "y": 7780,
+        "wires": [
+            [
+                "9d363e37cde29e82"
+            ]
+        ]
+    },
+    {
+        "id": "9d363e37cde29e82",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 710,
+        "y": 7780,
+        "wires": [
+            [
+                "a22b98fc9c3b5ff9"
+            ]
+        ]
+    },
+    {
+        "id": "64e4ff0878c8478c",
+        "type": "digest",
+        "z": "36b437ff56e6752c",
+        "name": "Hash the body data",
+        "algorithm": "SHA256",
+        "x": 270,
+        "y": 7780,
+        "wires": [
+            [
+                "6574cfa36110f50b"
+            ]
+        ]
+    },
+    {
+        "id": "d1789a2bb6932fcf",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 2",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1220,
+        "y": 7780,
+        "wires": []
+    },
+    {
+        "id": "a755e457d27f260f",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "d": true,
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"commands\":[{\"code\":\"switch_1\",\"value\":true}]}",
+        "payloadType": "str",
+        "x": 110,
+        "y": 7420,
+        "wires": [
+            [
+                "c4f5d6cbd6ac7c6a"
+            ]
+        ]
+    },
+    {
+        "id": "0d451bc86b8ee282",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "d": true,
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"commands\":[{\"code\":\"switch_1\",\"value\":false}]}",
+        "payloadType": "str",
+        "x": 110,
+        "y": 7540,
+        "wires": [
+            [
+                "c5f9bd207afa9600"
+            ]
+        ]
+    },
+    {
+        "id": "d84ad02d355e53d1",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id3\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\" + device_id +\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n msg.payload = '';\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 7980,
+        "wires": [
+            [
+                "34945368f8fc92ea"
+            ]
+        ]
+    },
+    {
+        "id": "34945368f8fc92ea",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 930,
+        "y": 7980,
+        "wires": [
+            [
+                "0f4ae53f43e4b18f"
+            ]
+        ]
+    },
+    {
+        "id": "6d671fa3faf034ca",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "d": true,
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 130,
+        "y": 7980,
+        "wires": [
+            [
+                "2bc42b22de979c24"
+            ]
+        ]
+    },
+    {
+        "id": "2bc42b22de979c24",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id3\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\" + device_id +\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 300,
+        "y": 7980,
+        "wires": [
+            [
+                "3e082239baed95f3"
+            ]
+        ]
+    },
+    {
+        "id": "3e082239baed95f3",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 530,
+        "y": 7980,
+        "wires": [
+            [
+                "d84ad02d355e53d1"
+            ]
+        ]
+    },
+    {
+        "id": "377f4dcd12cb71cf",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Get Status Of Device \"Tempurate ditector\"",
+        "info": "",
+        "x": 200,
+        "y": 7940,
+        "wires": []
+    },
+    {
+        "id": "0f4ae53f43e4b18f",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 6",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1120,
+        "y": 7980,
+        "wires": []
+    },
+    {
+        "id": "c908be88dadc72b4",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\" + device_id +\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n msg.payload = '';\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2100,
+        "y": 7560,
+        "wires": [
+            [
+                "2ad46ba0aa03400b"
+            ]
+        ]
+    },
+    {
+        "id": "2ad46ba0aa03400b",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 2270,
+        "y": 7560,
+        "wires": [
+            [
+                "48a6273df306ebfa"
+            ]
+        ]
+    },
+    {
+        "id": "143f0f19d41340f3",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "d": true,
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 1470,
+        "y": 7560,
+        "wires": [
+            [
+                "2994dcc81bc5e8ea"
+            ]
+        ]
+    },
+    {
+        "id": "2994dcc81bc5e8ea",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\" + device_id +\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1640,
+        "y": 7560,
+        "wires": [
+            [
+                "e0aba4e3f1f295cf"
+            ]
+        ]
+    },
+    {
+        "id": "e0aba4e3f1f295cf",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 1870,
+        "y": 7560,
+        "wires": [
+            [
+                "c908be88dadc72b4"
+            ]
+        ]
+    },
+    {
+        "id": "39ba97c394066e86",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Get Status Of Device \"Smoke ditector\"",
+        "info": "",
+        "x": 1530,
+        "y": 7520,
+        "wires": []
+    },
+    {
+        "id": "e3e771f8139046b8",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id1\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\" + device_id +\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n msg.payload = '';\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2100,
+        "y": 7660,
+        "wires": [
+            [
+                "5a8c9ab9bfe8d7b1"
+            ]
+        ]
+    },
+    {
+        "id": "5a8c9ab9bfe8d7b1",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 2270,
+        "y": 7660,
+        "wires": [
+            [
+                "9d4b7a9e1c0d313e"
+            ]
+        ]
+    },
+    {
+        "id": "beccbef9b4a73608",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "d": true,
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 1470,
+        "y": 7660,
+        "wires": [
+            [
+                "7cbfd40ec35b0058"
+            ]
+        ]
+    },
+    {
+        "id": "7cbfd40ec35b0058",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id1\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\" + device_id +\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1640,
+        "y": 7660,
+        "wires": [
+            [
+                "cdf4f2e871cb5b98"
+            ]
+        ]
+    },
+    {
+        "id": "cdf4f2e871cb5b98",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 1870,
+        "y": 7660,
+        "wires": [
+            [
+                "e3e771f8139046b8"
+            ]
+        ]
+    },
+    {
+        "id": "218150043df1657f",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Get Status Of Device \"Circuit breaker\"",
+        "info": "",
+        "x": 1550,
+        "y": 7620,
+        "wires": []
+    },
+    {
+        "id": "9d4b7a9e1c0d313e",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 8",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2440,
+        "y": 7660,
+        "wires": []
+    },
+    {
+        "id": "48a6273df306ebfa",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 3",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2460,
+        "y": 7560,
+        "wires": []
+    },
+    {
+        "id": "8bc87b2b5be6225b",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Get Access Token",
+        "info": "",
+        "x": 130,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "74a38a5c866405da",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Settings CLICK SETUP TAB",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "flow.set(\"tuya_client_id\", \"mjq45dcms54tem54xjhu\");\nflow.set(\"tuya_user_id\", \"az17422914953382zDLZ\");\nflow.set(\"device_id\", \"eb2b67b39175f7de96otrc\"); // KHOI\nflow.set(\"device_id1\", \"ebd875e5aa4cec39b0xrtu\"); // CB\nflow.set(\"device_id2\", \"eb555cbe83aa9bf222nss6\"); // CHUONG\nflow.set(\"device_id3\", \"eb3039140feebcaf8cy465\"); // NHIET\nflow.set(\"device_id4\",\"eb12d1026e44687c5dgyeo\"); // GAS\nflow.set(\"device_id5\", \"ebd892d63884b7b026ffs6\"); // congtac quat hut\nflow.set(\"device_id6\", \"eb41fb77ca81cf17b72k6x\"); // Nút nhấn",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8591b9f53c1d75fb",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var url = \"https://openapi.tuyaus.com/v1.0/token?grant_type=1\";\nvar t = msg.time;\nvar sign = msg.payload;\nvar client_id  = flow.get(\"tuya_client_id\");\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"sign\": sign.toUpperCase(),\n },\n msg.payload = '';\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 140,
+        "wires": [
+            [
+                "d248fb88e9a87f3d"
+            ]
+        ]
+    },
+    {
+        "id": "d248fb88e9a87f3d",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 890,
+        "y": 140,
+        "wires": [
+            [
+                "90ff89f0b4e7d084",
+                "be46e6d6b4dd108e"
+            ]
+        ]
+    },
+    {
+        "id": "f3b4bbf3991382b4",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "3600",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "15",
+        "topic": "",
+        "x": 90,
+        "y": 140,
+        "wires": [
+            [
+                "6e6c3d200f75363e"
+            ]
+        ]
+    },
+    {
+        "id": "6e6c3d200f75363e",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var client_id  = flow.get(\"tuya_client_id\");\nvar t = msg.time;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/token?grant_type=1\";\n\n// Couldn't get nodered to process an empty string so this is a hash of an empty file\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 140,
+        "wires": [
+            [
+                "ac08218715d321da"
+            ]
+        ]
+    },
+    {
+        "id": "ac08218715d321da",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 470,
+        "y": 140,
+        "wires": [
+            [
+                "8591b9f53c1d75fb"
+            ]
+        ]
+    },
+    {
+        "id": "90ff89f0b4e7d084",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Extract Token from Response",
+        "func": "var data = msg.payload;\nvar access = data.result.access_token;\nvar refresh = data.result.refresh_token;\n\nvar creds ={\n \"access_token\" : access,\n \"refresh_token\" : refresh\n}\nflow.set(\"tuya\", creds);\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1120,
+        "y": 140,
+        "wires": [
+            [
+                "2d2ff3ad85808e2e",
+                "5c2540c656df779e"
+            ]
+        ]
+    },
+    {
+        "id": "2d2ff3ad85808e2e",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.result.access_token",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1360,
+        "y": 120,
+        "wires": [
+            [
+                "05953a4d202b8011"
+            ]
+        ]
+    },
+    {
+        "id": "05953a4d202b8011",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "access token",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1550,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "5c2540c656df779e",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.result.refresh_token",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1360,
+        "y": 180,
+        "wires": [
+            [
+                "929e18d0de06aca3"
+            ]
+        ]
+    },
+    {
+        "id": "929e18d0de06aca3",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "refresh access token",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1580,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "be46e6d6b4dd108e",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 13",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1080,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "f5704d87a085cfbb",
+        "type": "rpi-gpio in",
+        "z": "36b437ff56e6752c",
+        "name": "thanggg",
+        "pin": "19",
+        "intype": "up",
+        "debounce": "1000",
+        "read": true,
+        "bcm": true,
+        "x": 60,
+        "y": 420,
+        "wires": [
+            [
+                "d8b1262b8fd891cc",
+                "b2837bc4e9b5e49a"
+            ]
+        ]
+    },
+    {
+        "id": "b2837bc4e9b5e49a",
+        "type": "switch",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 230,
+        "y": 420,
+        "wires": [
+            [
+                "9f856b029d0246d4"
+            ]
+        ]
+    },
+    {
+        "id": "04b82e89e61137b6",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id2\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar sign = msg.payload;\n\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : access_token,\n },\n msg.payload = '{\"commands\":[{\"code\":\"master_mode\",\"value\":\"disarmed\"}]}';\n msg.url = url;\n msg.method = \"POST\";\n //msg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1480,
+        "y": 420,
+        "wires": [
+            [
+                "23f5fc9e0aac8fc0"
+            ]
+        ]
+    },
+    {
+        "id": "23f5fc9e0aac8fc0",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1630,
+        "y": 420,
+        "wires": [
+            [
+                "f839d9753e8227c6"
+            ]
+        ]
+    },
+    {
+        "id": "89397d7420bb4d6f",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id2\");\nvar hashed_size = msg.payload;\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"POST\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar content_hash = hashed_size;\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1040,
+        "y": 420,
+        "wires": [
+            [
+                "5776e2c642a8cd19"
+            ]
+        ]
+    },
+    {
+        "id": "5776e2c642a8cd19",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 1270,
+        "y": 420,
+        "wires": [
+            [
+                "04b82e89e61137b6"
+            ]
+        ]
+    },
+    {
+        "id": "00379147e11777e1",
+        "type": "digest",
+        "z": "36b437ff56e6752c",
+        "name": "Hash the body data",
+        "algorithm": "SHA256",
+        "x": 830,
+        "y": 420,
+        "wires": [
+            [
+                "89397d7420bb4d6f"
+            ]
+        ]
+    },
+    {
+        "id": "5d45a44a8aa9afc9",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"commands\":[{\"code\":\"master_mode\",\"value\":\"disarmed\"}]}",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 600,
+        "y": 420,
+        "wires": [
+            [
+                "00379147e11777e1"
+            ]
+        ]
+    },
+    {
+        "id": "9f856b029d0246d4",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "function 3",
+        "func": "// Function node: build trigger message\n// 1. gán thời gian hiện tại (ms từ epoch)\nmsg.time = Date.now();\n\n// 2. gán payload theo API Tuya\nmsg.payload = {\n    commands: [\n        {\n            code: \"master_mode\",   // hoặc \"master_state\" tuỳ bạn muốn\n            value: \"disarmed\"      // hoặc \"alarm\" nếu bạn dùng master_state\n        }\n    ]\n};\n\n// 3. trả về msg để chạy tiếp flow cũ\nreturn msg;\n\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 420,
+        "wires": [
+            [
+                "5d45a44a8aa9afc9",
+                "a3fc40a4dda55703"
+            ]
+        ]
+    },
+    {
+        "id": "13d309adcb2e36d1",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id2\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar sign = msg.payload;\n\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : access_token,\n },\n msg.payload = '{\"commands\":[{\"code\":\"muffling\",\"value\":true}]}';\n msg.url = url;\n msg.method = \"POST\";\n //msg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1460,
+        "y": 540,
+        "wires": [
+            [
+                "0dd0f4339cb37aea"
+            ]
+        ]
+    },
+    {
+        "id": "0dd0f4339cb37aea",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1630,
+        "y": 540,
+        "wires": [
+            [
+                "a9a2e3675359f784"
+            ]
+        ]
+    },
+    {
+        "id": "15ca2cb03b2181fd",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id2\");\nvar hashed_size = msg.payload;\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"POST\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar content_hash = hashed_size;\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1040,
+        "y": 540,
+        "wires": [
+            [
+                "63caeaafe7a165e2"
+            ]
+        ]
+    },
+    {
+        "id": "63caeaafe7a165e2",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 1250,
+        "y": 540,
+        "wires": [
+            [
+                "13d309adcb2e36d1"
+            ]
+        ]
+    },
+    {
+        "id": "b7e112f8ca1fe9d4",
+        "type": "digest",
+        "z": "36b437ff56e6752c",
+        "name": "Hash the body data",
+        "algorithm": "SHA256",
+        "x": 830,
+        "y": 540,
+        "wires": [
+            [
+                "15ca2cb03b2181fd"
+            ]
+        ]
+    },
+    {
+        "id": "a9a2e3675359f784",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "CHO CÒI IM LẶNG",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1890,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "a3fc40a4dda55703",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"commands\":[{\"code\":\"muffling\",\"value\":true}]}",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 600,
+        "y": 540,
+        "wires": [
+            [
+                "b7e112f8ca1fe9d4"
+            ]
+        ]
+    },
+    {
+        "id": "f839d9753e8227c6",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "CHẾ ĐỘ DISARM CHO CÒI",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1860,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "d8b1262b8fd891cc",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 22",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 200,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "656463dce97558bc",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Nút reset",
+        "info": "",
+        "x": 60,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "3b36824ce4a7c8aa",
+        "type": "switch",
+        "z": "36b437ff56e6752c",
+        "name": "Smoke Detection",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "10",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 730,
+        "y": 880,
+        "wires": [
+            [
+                "05452c90624663f3"
+            ]
+        ]
+    },
+    {
+        "id": "fb14a6750592c3dc",
+        "type": "remote-notification",
+        "z": "36b437ff56e6752c",
+        "confignode": "8e14984f4afe8216",
+        "name": "",
+        "notificationTitle": "payload.title",
+        "notificationTitleType": "msg",
+        "notificationBody": "payload.body",
+        "notificationBodyType": "msg",
+        "notificationSound": "siren",
+        "notificationSoundComputed": "payload.sound",
+        "notificationSoundComputedType": "msg",
+        "output": 1,
+        "x": 1230,
+        "y": 940,
+        "wires": [
+            [
+                "33bb77500f4b9342"
+            ]
+        ]
+    },
+    {
+        "id": "eabf9635b4991b10",
+        "type": "switch",
+        "z": "36b437ff56e6752c",
+        "name": "Gas Detection",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "20",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 740,
+        "y": 1000,
+        "wires": [
+            [
+                "4141e5c0bd2f491f"
+            ]
+        ]
+    },
+    {
+        "id": "71ed2bde6dfb10fb",
+        "type": "switch",
+        "z": "36b437ff56e6752c",
+        "name": "Temperature Alert",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gte",
+                "v": "400",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 710,
+        "y": 940,
+        "wires": [
+            [
+                "2e3938662d3bcf64"
+            ]
+        ]
+    },
+    {
+        "id": "c27dcf130977cb42",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "MQTT Smoke",
+        "topic": "server/esp8266S",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 130,
+        "y": 880,
+        "wires": [
+            [
+                "b3774db21ad96009"
+            ]
+        ]
+    },
+    {
+        "id": "cf47b1dc4d395c95",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "MQTT Temperature",
+        "topic": "server/esp8266T",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 150,
+        "y": 940,
+        "wires": [
+            [
+                "2304c8a2653660d6"
+            ]
+        ]
+    },
+    {
+        "id": "2dd846fb5f0a1715",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "MQTT Gas",
+        "topic": "server/esp8266G",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": false,
+        "inputs": 0,
+        "x": 120,
+        "y": 1000,
+        "wires": [
+            [
+                "1e95e18117d23451"
+            ]
+        ]
+    },
+    {
+        "id": "b3774db21ad96009",
+        "type": "ui_gauge",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "group": "4237a466dbeb7cee",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "F:1.R:1",
+        "label": "NPM",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 340,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "1e95e18117d23451",
+        "type": "ui_gauge",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "group": "297fb917525e91db",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "F:4.R:6",
+        "label": "%",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 360,
+        "y": 1000,
+        "wires": []
+    },
+    {
+        "id": "2304c8a2653660d6",
+        "type": "ui_gauge",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "group": "930f43f1f5b51246",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "F:2.R:3",
+        "label": "'C",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "1000",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 360,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "4f558a0389a39d6b",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "app/CB",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 110,
+        "y": 1060,
+        "wires": [
+            [
+                "b5d96c78df6b4223"
+            ]
+        ]
+    },
+    {
+        "id": "b5d96c78df6b4223",
+        "type": "ui_text",
+        "z": "36b437ff56e6752c",
+        "group": "0e98a1ce8793f5b7",
+        "order": 0,
+        "width": "6",
+        "height": "2",
+        "name": "",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-center",
+        "className": "",
+        "style": true,
+        "font": "Times New Roman,Times,serif",
+        "fontSize": "30",
+        "color": "#0481f6",
+        "x": 350,
+        "y": 1060,
+        "wires": []
+    },
+    {
+        "id": "dc5117ec77e8719d",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "ONLYFAN",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 1120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3835d613c4712687",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "app/CHUONG",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 1180,
+        "wires": [
+            [
+                "0d11f033b0e7c1f8"
+            ]
+        ]
+    },
+    {
+        "id": "0d11f033b0e7c1f8",
+        "type": "ui_text",
+        "z": "36b437ff56e6752c",
+        "group": "a2a30086580d6884",
+        "order": 0,
+        "width": "6",
+        "height": "2",
+        "name": "",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-center",
+        "className": "",
+        "style": true,
+        "font": "Times New Roman,Times,serif",
+        "fontSize": "30",
+        "color": "#0481f6",
+        "x": 390,
+        "y": 1180,
+        "wires": []
+    },
+    {
+        "id": "264c73d1705f517d",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "APP",
+        "info": "",
+        "x": 150,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "33bb77500f4b9342",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 23",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1440,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "05452c90624663f3",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"title\":\"Cảnh Báo\",\"body\":\"Phát hiện khói tại F:1.R:1\"}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 940,
+        "y": 880,
+        "wires": [
+            [
+                "fb14a6750592c3dc"
+            ]
+        ]
+    },
+    {
+        "id": "2e3938662d3bcf64",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"title\":\"Cảnh Báo\",\"body\":\"Phát hiện nhiệt cao tại F:2.R:3\"}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 940,
+        "wires": [
+            [
+                "fb14a6750592c3dc"
+            ]
+        ]
+    },
+    {
+        "id": "4141e5c0bd2f491f",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"title\":\"Cảnh Báo\",\"body\":\"Phát hiện Gas tại F:4.R:6\"}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 960,
+        "y": 1000,
+        "wires": [
+            [
+                "fb14a6750592c3dc"
+            ]
+        ]
+    },
+    {
+        "id": "cba82a844fefa456",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "1",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 510,
+        "y": 940,
+        "wires": [
+            [
+                "71ed2bde6dfb10fb"
+            ]
+        ]
+    },
+    {
+        "id": "c73452787d46156c",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "2",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 510,
+        "y": 880,
+        "wires": [
+            [
+                "3b36824ce4a7c8aa"
+            ]
+        ]
+    },
+    {
+        "id": "ab1827f9afb32bcb",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "3",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 530,
+        "y": 1000,
+        "wires": [
+            [
+                "eabf9635b4991b10"
+            ]
+        ]
+    },
+    {
+        "id": "e430ae3e772362d9",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "GRAFANA",
+        "info": "",
+        "x": 160,
+        "y": 1480,
+        "wires": []
+    },
+    {
+        "id": "d480b6ea23202a9e",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "HIVEMQ Subscribe",
+        "topic": "123",
+        "qos": "0",
+        "datatype": "utf8",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 1540,
+        "wires": [
+            [
+                "0df045786005eef2"
+            ]
+        ]
+    },
+    {
+        "id": "0df045786005eef2",
+        "type": "json",
+        "z": "36b437ff56e6752c",
+        "name": "Parse JSON",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 370,
+        "y": 1540,
+        "wires": [
+            [
+                "0388a67c3709242e"
+            ]
+        ]
+    },
+    {
+        "id": "0388a67c3709242e",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Chuẩn hoá dữ liệu cho InfluxDB",
+        "func": "// Lấy mảng result từ msg.payload\nvar dataArray = msg.payload.result;\n\n// Tạo object fields để lưu trữ dữ liệu\nvar fields = {};\n\n// Duyệt mảng, gán giá trị vào fields với kiểu dữ liệu tương ứng\ndataArray.forEach(function(item) {\n    switch(item.code) {\n        case \"smoke_sensor_value\":\n            // numeric\n            fields.smoke_sensor_value = Number(item.value);\n            break;\n\n       \n        case \"battery_percentage\":\n            // numeric\n            fields.battery_percentage = Number(item.value);\n            break;\n\n        // Các code khác (nếu có) ...\n        default:\n            break;\n    }\n});\n\n// Các trường success, t, tid không theo cặp (code, value) hay sao? \n// Giả sử chúng nằm cùng trong item => ta check\ndataArray.forEach(function(item) {\n    if (item.hasOwnProperty(\"success\")) {\n        fields.success = Boolean(item.success);\n    }\n    if (item.hasOwnProperty(\"t\")) {\n        // t có thể là timestamp => numeric\n        fields.t = Number(item.t);\n    }\n    if (item.hasOwnProperty(\"tid\")) {\n        fields.tid = String(item.tid);\n    }\n});\n\n// Cuối cùng, ta tạo payload để InfluxDB Node hiểu\nmsg.payload = [\n    {\n        measurement: \"smoke_sensor\",  // measurement bắt buộc để InfluxDB phân loại\n        tags: {\n            // tuỳ chọn, ví dụ:\n            device: \"node-red-device\"\n        },\n        fields: fields,\n        // Chọn timestamp. Nếu muốn dùng t làm timestamp:\n        // timestamp: fields.t,\n        // Còn nếu bạn chỉ cần lấy thời gian hiện tại thì:\n        timestamp: new Date().getTime()\n    }\n];\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 1540,
+        "wires": [
+            [
+                "c37d1292456222da"
+            ]
+        ]
+    },
+    {
+        "id": "c37d1292456222da",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload[0].fields.smoke_sensor_value",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 900,
+        "y": 1540,
+        "wires": [
+            [
+                "476741ac6b550c8c"
+            ]
+        ]
+    },
+    {
+        "id": "d85841374cf8d8b0",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "HIVEMQ Subscribe",
+        "topic": "345",
+        "qos": "0",
+        "datatype": "utf8",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 1660,
+        "wires": [
+            [
+                "3e12441f52d725e1"
+            ]
+        ]
+    },
+    {
+        "id": "3e12441f52d725e1",
+        "type": "json",
+        "z": "36b437ff56e6752c",
+        "name": "Parse JSON",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 370,
+        "y": 1660,
+        "wires": [
+            [
+                "ff52591ba14f5d99"
+            ]
+        ]
+    },
+    {
+        "id": "d20d9a2e9893e49a",
+        "type": "influxdb out",
+        "z": "36b437ff56e6752c",
+        "influxdb": "d73ddb2002e6764a",
+        "name": "4TL",
+        "measurement": "temp",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "IUH",
+        "bucket": "temp",
+        "x": 1110,
+        "y": 1660,
+        "wires": []
+    },
+    {
+        "id": "ff52591ba14f5d99",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Chuẩn hoá dữ liệu cho InfluxDB",
+        "func": "// Lấy mảng result từ msg.payload\nvar dataArray = msg.payload.result;\n\n// Tạo object fields để lưu trữ dữ liệu\nvar fields = {};\n\n// Duyệt mảng result, gán giá trị vào fields với kiểu dữ liệu tương ứng\ndataArray.forEach(function(item) {\n    if (item.code && item.value !== undefined) {\n        switch(item.code) {\n            // Các trường số (numeric)\n            case \"va_temperature\":\n                fields.va_temperature = Number(item.value);\n                break;\n            case \"va_humidity\":\n                fields.va_humidity = Number(item.value);\n                break;\n            case \"battery_percentage\":\n                fields.battery_percentage = Number(item.value);\n                break;\n            case \"maxtemp_set\":\n                fields.maxtemp_set = Number(item.value);\n                break;\n            case \"minitemp_set\":\n                fields.minitemp_set = Number(item.value);\n                break;\n            case \"maxhum_set\":\n                fields.maxhum_set = Number(item.value);\n                break;\n            case \"minihum_set\":\n                fields.minihum_set = Number(item.value);\n                break;\n            case \"temp_periodic_report\":\n                fields.temp_periodic_report = Number(item.value);\n                break;\n            case \"hum_periodic_report\":\n                fields.hum_periodic_report = Number(item.value);\n                break;\n            case \"temp_sensitivity\":\n                fields.temp_sensitivity = Number(item.value);\n                break;\n            case \"hum_sensitivity\":\n                fields.hum_sensitivity = Number(item.value);\n                break;\n\n            // Các trường chuỗi (string)\n            case \"battery_state\":\n                fields.battery_state = String(item.value);\n                break;\n            case \"temp_unit_convert\":\n                fields.temp_unit_convert = String(item.value);\n                break;\n            case \"temp_alarm\":\n                fields.temp_alarm = String(item.value);\n                break;\n            case \"hum_alarm\":\n                fields.hum_alarm = String(item.value);\n                break;\n\n            // Trường hợp mặc định: nếu có thêm code mới, bỏ qua\n            default:\n                break;\n        }\n    }\n});\n\n// Xử lý các trường success, t, tid từ msg.payload (không nằm trong dataArray)\nif (msg.payload.hasOwnProperty(\"success\")) {\n    fields.success = Boolean(msg.payload.success);\n}\nif (msg.payload.hasOwnProperty(\"t\")) {\n    fields.t = Number(msg.payload.t);\n}\nif (msg.payload.hasOwnProperty(\"tid\")) {\n    fields.tid = String(msg.payload.tid);\n}\n\n// Tạo payload cho InfluxDB\nmsg.payload = [\n    {\n        measurement: \"temp\",  // Giữ nguyên measurement như yêu cầu ban đầu\n        tags: {\n            device: \"node-red-device\"  // Tag tùy chọn, có thể thay đổi nếu cần\n        },\n        fields: fields,\n        timestamp: fields.t || new Date().getTime()  // Dùng t nếu có, nếu không dùng thời gian hiện tại\n    }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 1660,
+        "wires": [
+            [
+                "16132e338ee3e79f"
+            ]
+        ]
+    },
+    {
+        "id": "16132e338ee3e79f",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload[0].fields.va_temperature",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 900,
+        "y": 1660,
+        "wires": [
+            [
+                "d20d9a2e9893e49a"
+            ]
+        ]
+    },
+    {
+        "id": "bd2b18bdc1cc8141",
+        "type": "mqtt in",
+        "z": "36b437ff56e6752c",
+        "name": "HIVEMQ Subscribe",
+        "topic": "567",
+        "qos": "0",
+        "datatype": "utf8",
+        "broker": "d4ee88c58d35a940",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 1780,
+        "wires": [
+            [
+                "286f67b87abcc4e8"
+            ]
+        ]
+    },
+    {
+        "id": "286f67b87abcc4e8",
+        "type": "json",
+        "z": "36b437ff56e6752c",
+        "name": "Parse JSON",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 370,
+        "y": 1780,
+        "wires": [
+            [
+                "d89a920cb860ff1c"
+            ]
+        ]
+    },
+    {
+        "id": "c1b1c14f27504454",
+        "type": "influxdb out",
+        "z": "36b437ff56e6752c",
+        "influxdb": "28a6f0529bc505b6",
+        "name": "4TL",
+        "measurement": "gas",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "IUH",
+        "bucket": "gas",
+        "x": 1110,
+        "y": 1780,
+        "wires": []
+    },
+    {
+        "id": "d89a920cb860ff1c",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Chuẩn hoá dữ liệu cho InfluxDB",
+        "func": "// Lấy mảng result từ msg.payload\nvar dataArray = msg.payload.result;\n\n// Tạo object fields để lưu trữ dữ liệu\nvar fields = {};\n\n// Duyệt mảng result, gán giá trị vào fields với kiểu dữ liệu tương ứng\ndataArray.forEach(function(item) {\n    if (item.code && item.value !== undefined) {\n        switch(item.code) {\n            // Các trường số (numeric)\n            case \"va_temperature\":\n                fields.va_temperature = Number(item.value);\n                break;\n            case \"va_humidity\":\n                fields.va_humidity = Number(item.value);\n                break;\n            case \"battery_percentage\":\n                fields.battery_percentage = Number(item.value);\n                break;\n            case \"maxtemp_set\":\n                fields.maxtemp_set = Number(item.value);\n                break;\n            case \"minitemp_set\":\n                fields.minitemp_set = Number(item.value);\n                break;\n            case \"maxhum_set\":\n                fields.maxhum_set = Number(item.value);\n                break;\n            case \"minihum_set\":\n                fields.minihum_set = Number(item.value);\n                break;\n            case \"temp_periodic_report\":\n                fields.temp_periodic_report = Number(item.value);\n                break;\n            case \"hum_periodic_report\":\n                fields.hum_periodic_report = Number(item.value);\n                break;\n            case \"temp_sensitivity\":\n                fields.temp_sensitivity = Number(item.value);\n                break;\n            case \"hum_sensitivity\":\n                fields.hum_sensitivity = Number(item.value);\n                break;\n            case \"gas_sensor_value\":\n                fields.gas_sensor_value = Number(item.value);\n                break;\n\n            // Các trường chuỗi (string)\n            case \"battery_state\":\n                fields.battery_state = String(item.value);\n                break;\n            case \"temp_unit_convert\":\n                fields.temp_unit_convert = String(item.value);\n                break;\n            case \"temp_alarm\":\n                fields.temp_alarm = String(item.value);\n                break;\n            case \"hum_alarm\":\n                fields.hum_alarm = String(item.value);\n                break;\n\n            // Trường hợp mặc định: nếu có thêm code mới, bỏ qua\n            default:\n                break;\n        }\n    }\n});\n\n// Xử lý các trường success, t, tid từ msg.payload (không nằm trong dataArray)\nif (msg.payload.hasOwnProperty(\"success\")) {\n    fields.success = Boolean(msg.payload.success);\n}\nif (msg.payload.hasOwnProperty(\"t\")) {\n    fields.t = Number(msg.payload.t);\n}\nif (msg.payload.hasOwnProperty(\"tid\")) {\n    fields.tid = String(msg.payload.tid);\n}\n\n// Tạo payload cho InfluxDB\nmsg.payload = [\n    {\n        measurement: \"gas\",  // Giữ nguyên measurement như yêu cầu ban đầu\n        tags: {\n            device: \"node-red-device\"  // Tag tùy chọn, có thể thay đổi nếu cần\n        },\n        fields: fields,\n        timestamp: fields.t || new Date().getTime()  // Dùng t nếu có, nếu không dùng thời gian hiện tại\n    }\n];\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 1780,
+        "wires": [
+            [
+                "58b88323e8d11fc3"
+            ]
+        ]
+    },
+    {
+        "id": "58b88323e8d11fc3",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload[0].fields.gas_sensor_value",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 900,
+        "y": 1780,
+        "wires": [
+            [
+                "c1b1c14f27504454"
+            ]
+        ]
+    },
+    {
+        "id": "464651cab55d563b",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "function 1",
+        "func": "let payload1 = msg.payload; // Giá trị của payload1\nlet payload2 = \"name: S.F:1.R:1\"; // Giá trị của payload2\n// Kết hợp dữ liệu thành một chuỗi không có dấu {}\nmsg.payload = `${payload1}\\n${payload2}`; // Mỗi nội dung trên một dòng\n\nreturn msg; ",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1360,
+        "y": 2980,
+        "wires": [
+            [
+                "4c05ee5a04d572af"
+            ]
+        ]
+    },
+    {
+        "id": "4c05ee5a04d572af",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "server/esp8266S",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 1530,
+        "y": 2980,
+        "wires": []
+    },
+    {
+        "id": "e3291ae4ef92f72a",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "gửi giá trị khói lên sever để esp đọc",
+        "info": "",
+        "x": 1560,
+        "y": 2940,
+        "wires": []
+    },
+    {
+        "id": "c2fcb861555a61a6",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "function 4",
+        "func": "let payload1 = msg.payload; // Giá trị của payload1\nlet payload2 = \"name: G.F:4.R:6\"; // Giá trị của payload2\n// Kết hợp dữ liệu thành một chuỗi không có dấu {}\nmsg.payload = `${payload1}\\n${payload2}`; // Mỗi nội dung trên một dòng\n\nreturn msg; ",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1540,
+        "y": 3140,
+        "wires": [
+            [
+                "88a965ba3d231c92"
+            ]
+        ]
+    },
+    {
+        "id": "88a965ba3d231c92",
+        "type": "mqtt out",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "topic": "server/esp8266G",
+        "qos": "0",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d4ee88c58d35a940",
+        "x": 1730,
+        "y": 3140,
+        "wires": []
+    },
+    {
+        "id": "758123b5f08c121b",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "gửi giá trị gas lên sever để esp đọc",
+        "info": "",
+        "x": 1780,
+        "y": 3100,
+        "wires": []
+    },
+    {
+        "id": "b39f9f92895fc8ef",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id5\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar sign = msg.payload;\n\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : access_token,\n },\n    msg.payload = '{\"commands\":[{\"code\":\"switch_1\",\"value\":true}]}';\n msg.url = url;\n msg.method = \"POST\";\n //msg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2300,
+        "y": 3360,
+        "wires": [
+            [
+                "3961e7555aed3407"
+            ]
+        ]
+    },
+    {
+        "id": "3961e7555aed3407",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 2470,
+        "y": 3360,
+        "wires": [
+            [
+                "602573cdca85f62f"
+            ]
+        ]
+    },
+    {
+        "id": "443706e350c8f26b",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id5\");\nvar hashed_size = msg.payload;\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"POST\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar content_hash = hashed_size;\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1900,
+        "y": 3360,
+        "wires": [
+            [
+                "3a11cf4416136fa3"
+            ]
+        ]
+    },
+    {
+        "id": "3a11cf4416136fa3",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 2110,
+        "y": 3360,
+        "wires": [
+            [
+                "b39f9f92895fc8ef"
+            ]
+        ]
+    },
+    {
+        "id": "bbea68c5833278da",
+        "type": "digest",
+        "z": "36b437ff56e6752c",
+        "name": "Hash the body data",
+        "algorithm": "SHA256",
+        "x": 1710,
+        "y": 3360,
+        "wires": [
+            [
+                "443706e350c8f26b"
+            ]
+        ]
+    },
+    {
+        "id": "cc9e2809cb413165",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"commands\":[{\"code\":\"switch_1\",\"value\":true}]}",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1500,
+        "y": 3360,
+        "wires": [
+            [
+                "bbea68c5833278da"
+            ]
+        ]
+    },
+    {
+        "id": "602573cdca85f62f",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 17",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2660,
+        "y": 3360,
+        "wires": []
+    },
+    {
+        "id": "3051bf4f079c3247",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "giá trị   gas >20 thì    bật switch để mở quạt hút và đồng thời kiểm tra đạt 4 lần liên  tiếp vượt ngưỡng gas chưa",
+        "info": "",
+        "x": 1800,
+        "y": 3320,
+        "wires": []
+    },
+    {
+        "id": "56407643b9780a6e",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id5\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar sign = msg.payload;\n\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : access_token,\n },\n    msg.payload = '{\"commands\":[{\"code\":\"switch_1\",\"value\":false}]}';\n msg.url = url;\n msg.method = \"POST\";\n //msg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2340,
+        "y": 3480,
+        "wires": [
+            [
+                "ab836cb897cfca0c"
+            ]
+        ]
+    },
+    {
+        "id": "ab836cb897cfca0c",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 2530,
+        "y": 3480,
+        "wires": [
+            [
+                "62a3d8c984132d92"
+            ]
+        ]
+    },
+    {
+        "id": "e82bc185a8c0af0f",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id5\");\nvar hashed_size = msg.payload;\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"POST\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar content_hash = hashed_size;\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1900,
+        "y": 3480,
+        "wires": [
+            [
+                "e6730b83cad4cb82"
+            ]
+        ]
+    },
+    {
+        "id": "e6730b83cad4cb82",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 2130,
+        "y": 3480,
+        "wires": [
+            [
+                "56407643b9780a6e"
+            ]
+        ]
+    },
+    {
+        "id": "a56f5fa27f78f85d",
+        "type": "digest",
+        "z": "36b437ff56e6752c",
+        "name": "Hash the body data",
+        "algorithm": "SHA256",
+        "x": 1710,
+        "y": 3480,
+        "wires": [
+            [
+                "e82bc185a8c0af0f"
+            ]
+        ]
+    },
+    {
+        "id": "ef4ea007b0a8fa2b",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"commands\":[{\"code\":\"switch_1\",\"value\":false}]}",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1480,
+        "y": 3480,
+        "wires": [
+            [
+                "a56f5fa27f78f85d"
+            ]
+        ]
+    },
+    {
+        "id": "62a3d8c984132d92",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 18",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 2700,
+        "y": 3480,
+        "wires": []
+    },
+    {
+        "id": "8b378b3ee6b1377a",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Giá trị gas = 0 thì cho  switch tắt  <=> quạt hút tắt",
+        "info": "",
+        "x": 1620,
+        "y": 3540,
+        "wires": []
+    },
+    {
+        "id": "6b5d5d8b6f4f2b98",
+        "type": "switch",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gt",
+                "v": "20",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1250,
+        "y": 3400,
+        "wires": [
+            [
+                "cc9e2809cb413165"
+            ],
+            [
+                "ef4ea007b0a8fa2b"
+            ]
+        ]
+    },
+    {
+        "id": "119d23b26211ac1d",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"commands\":[{\"code\":\"switch_1\",\"value\":true}]}",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 160,
+        "y": 7160,
+        "wires": [
+            [
+                "67b1ec586152305f"
+            ]
+        ]
+    },
+    {
+        "id": "628b315d4a0f54ae",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id1\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar sign = msg.payload;\n\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : access_token,\n },\n    msg.payload = '{\"commands\":[{\"code\":\"switch_1\",\"value\":true}]}';\n msg.url = url;\n msg.method = \"POST\";\n //msg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1000,
+        "y": 7160,
+        "wires": [
+            [
+                "e8f2ed811255a670"
+            ]
+        ]
+    },
+    {
+        "id": "e8f2ed811255a670",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 1150,
+        "y": 7160,
+        "wires": [
+            [
+                "210c5df3d49a22df"
+            ]
+        ]
+    },
+    {
+        "id": "3db89a0d5d964a24",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id1\");\nvar hashed_size = msg.payload;\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"POST\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar content_hash = hashed_size;\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 580,
+        "y": 7160,
+        "wires": [
+            [
+                "b5c36203f26592dd"
+            ]
+        ]
+    },
+    {
+        "id": "b5c36203f26592dd",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 810,
+        "y": 7160,
+        "wires": [
+            [
+                "628b315d4a0f54ae"
+            ]
+        ]
+    },
+    {
+        "id": "67b1ec586152305f",
+        "type": "digest",
+        "z": "36b437ff56e6752c",
+        "name": "Hash the body data",
+        "algorithm": "SHA256",
+        "x": 370,
+        "y": 7160,
+        "wires": [
+            [
+                "3db89a0d5d964a24"
+            ]
+        ]
+    },
+    {
+        "id": "210c5df3d49a22df",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 5",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1300,
+        "y": 7160,
+        "wires": []
+    },
+    {
+        "id": "3ecbfb40a5a52e73",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Tác động  CB ON",
+        "info": "",
+        "x": 160,
+        "y": 7120,
+        "wires": []
+    },
+    {
+        "id": "e03398b401064ff0",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id1\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar sign = msg.payload;\n\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : access_token,\n },\n msg.payload = '{\"commands\":[{\"code\":\"switch_1\",\"value\":false}]}';\n msg.url = url;\n msg.method = \"POST\";\n //msg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3140,
+        "y": 3000,
+        "wires": [
+            [
+                "dd1e90c0b8c3f154"
+            ]
+        ]
+    },
+    {
+        "id": "dd1e90c0b8c3f154",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 3290,
+        "y": 3000,
+        "wires": [
+            [
+                "85f15e0c2eecc42f"
+            ]
+        ]
+    },
+    {
+        "id": "b0dd937da54dbf75",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id1\");\nvar hashed_size = msg.payload;\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"POST\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar content_hash = hashed_size;\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2720,
+        "y": 3000,
+        "wires": [
+            [
+                "e8e0ee90ae7722ae"
+            ]
+        ]
+    },
+    {
+        "id": "e8e0ee90ae7722ae",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 2930,
+        "y": 3000,
+        "wires": [
+            [
+                "e03398b401064ff0"
+            ]
+        ]
+    },
+    {
+        "id": "9f99dc33489957ef",
+        "type": "digest",
+        "z": "36b437ff56e6752c",
+        "name": "Hash the body data",
+        "algorithm": "SHA256",
+        "x": 2530,
+        "y": 3000,
+        "wires": [
+            [
+                "b0dd937da54dbf75"
+            ]
+        ]
+    },
+    {
+        "id": "85f15e0c2eecc42f",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 11",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 3460,
+        "y": 3000,
+        "wires": []
+    },
+    {
+        "id": "d1c84619072224e7",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"commands\":[{\"code\":\"switch_1\",\"value\":false}]}",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 2340,
+        "y": 3000,
+        "wires": [
+            [
+                "9f99dc33489957ef"
+            ]
+        ]
+    },
+    {
+        "id": "eb3a61f5a0d2d157",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "nhiẹt",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1410,
+        "y": 2880,
+        "wires": []
+    },
+    {
+        "id": "9b081fc4808867f9",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 12",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1340,
+        "y": 3040,
+        "wires": []
+    },
+    {
+        "id": "a15a6ee2c1160e39",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 14",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1500,
+        "y": 3220,
+        "wires": []
+    },
+    {
+        "id": "db4aec8d5921da41",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "GỬI TRẠNG THÁI CB  LÊN  HIVE ĐỂ ESP NHẬN",
+        "info": "",
+        "x": 1700,
+        "y": 1840,
+        "wires": []
+    },
+    {
+        "id": "4350d499912c4dea",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "GỬI TRẠNG THÁI CB LÊN APP",
+        "info": "",
+        "x": 1610,
+        "y": 1900,
+        "wires": []
+    },
+    {
+        "id": "b5727e2760dd0398",
+        "type": "switch",
+        "z": "36b437ff56e6752c",
+        "name": "KHÓI",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gte",
+                "v": "20",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1810,
+        "y": 2560,
+        "wires": [
+            [
+                "0408f58a5994eedf"
+            ]
+        ]
+    },
+    {
+        "id": "ef961e1f5f6de30e",
+        "type": "switch",
+        "z": "36b437ff56e6752c",
+        "name": "NHIỆT",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gte",
+                "v": "400",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1810,
+        "y": 2480,
+        "wires": [
+            [
+                "0408f58a5994eedf"
+            ]
+        ]
+    },
+    {
+        "id": "7f3513c45253a1f3",
+        "type": "switch",
+        "z": "36b437ff56e6752c",
+        "name": "GAS",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "gte",
+                "v": "20",
+                "vt": "num"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1810,
+        "y": 2640,
+        "wires": [
+            [
+                "0408f58a5994eedf"
+            ]
+        ]
+    },
+    {
+        "id": "7d97d3689ea6c36b",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id2\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar sign = msg.payload;\n\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : access_token,\n },\n msg.payload = '{\"commands\":[{\"code\":\"master_mode\",\"value\":\"sos\"}]}';\n msg.url = url;\n msg.method = \"POST\";\n //msg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3000,
+        "y": 2560,
+        "wires": [
+            [
+                "d30a6fab58fde9a3"
+            ]
+        ]
+    },
+    {
+        "id": "d30a6fab58fde9a3",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 3150,
+        "y": 2560,
+        "wires": [
+            [
+                "ef4db32539b5dd2a"
+            ]
+        ]
+    },
+    {
+        "id": "385bf1b8fd6e0d38",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id2\");\nvar hashed_size = msg.payload;\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"POST\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar content_hash = hashed_size;\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2560,
+        "y": 2560,
+        "wires": [
+            [
+                "c31629ba0f0deaa9"
+            ]
+        ]
+    },
+    {
+        "id": "c31629ba0f0deaa9",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 2790,
+        "y": 2560,
+        "wires": [
+            [
+                "7d97d3689ea6c36b"
+            ]
+        ]
+    },
+    {
+        "id": "acd462bf824252a8",
+        "type": "digest",
+        "z": "36b437ff56e6752c",
+        "name": "Hash the body data",
+        "algorithm": "SHA256",
+        "x": 2350,
+        "y": 2560,
+        "wires": [
+            [
+                "385bf1b8fd6e0d38"
+            ]
+        ]
+    },
+    {
+        "id": "0408f58a5994eedf",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"commands\":[{\"code\":\"master_mode\",\"value\":\"sos\"}]}",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 2120,
+        "y": 2560,
+        "wires": [
+            [
+                "acd462bf824252a8"
+            ]
+        ]
+    },
+    {
+        "id": "ef4db32539b5dd2a",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "CHẾ ĐỘ ALARM CHO CÒI",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 3380,
+        "y": 2560,
+        "wires": []
+    },
+    {
+        "id": "d709fbc23bdc2a5c",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Kích hoạt chuông báo",
+        "info": "",
+        "x": 1860,
+        "y": 2420,
+        "wires": []
+    },
+    {
+        "id": "3b0f3fcb6e83fd8f",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id6\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n    msg.payload = { \n      \"status_value\": \"Trang thai\" };\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 3760,
+        "wires": [
+            [
+                "261e821d8964d623"
+            ]
+        ]
+    },
+    {
+        "id": "261e821d8964d623",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 990,
+        "y": 3760,
+        "wires": [
+            [
+                "9ff747e052ace4fa"
+            ]
+        ]
+    },
+    {
+        "id": "48debc34f86b8840",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id6\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 3760,
+        "wires": [
+            [
+                "395021f5092cfdfa"
+            ]
+        ]
+    },
+    {
+        "id": "395021f5092cfdfa",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 570,
+        "y": 3760,
+        "wires": [
+            [
+                "3b0f3fcb6e83fd8f"
+            ]
+        ]
+    },
+    {
+        "id": "2bdfd0a376b8cf85",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "TRẠNG THÁI NÚT NHẤN",
+        "info": "",
+        "x": 390,
+        "y": 3720,
+        "wires": []
+    },
+    {
+        "id": "b3a86e9f7b5719f9",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "3",
+        "topic": "",
+        "x": 150,
+        "y": 3760,
+        "wires": [
+            [
+                "48debc34f86b8840"
+            ]
+        ]
+    },
+    {
+        "id": "22ce1c42d00ce91d",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "function 7",
+        "func": "// Kiểm tra giá trị msg.payload\nif (msg.payload === true) {\n    return msg; // Chỉ gửi đi nếu giá trị là true\n} else {\n    return null; // Không gửi đi nếu giá trị là false\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1440,
+        "y": 3760,
+        "wires": [
+            [
+                "b9ff91dbc871ec82",
+                "332f5fce6692e4ac"
+            ]
+        ]
+    },
+    {
+        "id": "76d2df9c3f4d816b",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id2\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar sign = msg.payload;\n\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : access_token,\n },\n msg.payload = '{\"commands\":[{\"code\":\"master_mode\",\"value\":\"sos\"}]}';\n msg.url = url;\n msg.method = \"POST\";\n //msg.payload = '';\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2720,
+        "y": 3760,
+        "wires": [
+            [
+                "287b454b7f8b3031"
+            ]
+        ]
+    },
+    {
+        "id": "287b454b7f8b3031",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 2870,
+        "y": 3760,
+        "wires": [
+            [
+                "ec9493e6cca834b2"
+            ]
+        ]
+    },
+    {
+        "id": "601872107b7e5e24",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id2\");\nvar hashed_size = msg.payload;\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"POST\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/commands\";\nvar content_hash = hashed_size;\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2280,
+        "y": 3760,
+        "wires": [
+            [
+                "6276df5cc13f0128"
+            ]
+        ]
+    },
+    {
+        "id": "6276df5cc13f0128",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 2510,
+        "y": 3760,
+        "wires": [
+            [
+                "76d2df9c3f4d816b"
+            ]
+        ]
+    },
+    {
+        "id": "91ad644bf06ce7ec",
+        "type": "digest",
+        "z": "36b437ff56e6752c",
+        "name": "Hash the body data",
+        "algorithm": "SHA256",
+        "x": 2070,
+        "y": 3760,
+        "wires": [
+            [
+                "601872107b7e5e24"
+            ]
+        ]
+    },
+    {
+        "id": "ac98dc20778883be",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"commands\":[{\"code\":\"master_mode\",\"value\":\"sos\"}]}",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1840,
+        "y": 3760,
+        "wires": [
+            [
+                "91ad644bf06ce7ec"
+            ]
+        ]
+    },
+    {
+        "id": "ec9493e6cca834b2",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "CHẾ ĐỘ ALARM CHO CÒI",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 3100,
+        "y": 3760,
+        "wires": []
+    },
+    {
+        "id": "b9ff91dbc871ec82",
+        "type": "switch",
+        "z": "36b437ff56e6752c",
+        "name": "NHIỆT",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1650,
+        "y": 3760,
+        "wires": [
+            [
+                "ac98dc20778883be"
+            ]
+        ]
+    },
+    {
+        "id": "9ff747e052ace4fa",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.result[1].value",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1240,
+        "y": 3760,
+        "wires": [
+            [
+                "22ce1c42d00ce91d",
+                "61ac7837234a36bd"
+            ]
+        ]
+    },
+    {
+        "id": "61ac7837234a36bd",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1500,
+        "y": 3660,
+        "wires": []
+    },
+    {
+        "id": "332f5fce6692e4ac",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 4",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1740,
+        "y": 3900,
+        "wires": []
+    },
+    {
+        "id": "85eccb6235fda923",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "2s",
+        "info": "",
+        "x": 150,
+        "y": 3700,
+        "wires": []
+    },
+    {
+        "id": "b9d0477015d5cf55",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id6\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n    msg.payload = { \n      \"status_value\": \"Trang thai\" };\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 7000,
+        "wires": [
+            [
+                "6244f58a77130105"
+            ]
+        ]
+    },
+    {
+        "id": "6244f58a77130105",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 930,
+        "y": 7000,
+        "wires": [
+            [
+                "0ca44f81a66b6266"
+            ]
+        ]
+    },
+    {
+        "id": "ee63fe2c2210d53d",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id6\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 7000,
+        "wires": [
+            [
+                "e8200acbf162369f"
+            ]
+        ]
+    },
+    {
+        "id": "e8200acbf162369f",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "e3fb7a6eb8394fc386a7cd68c6df83f8",
+        "x": 550,
+        "y": 7000,
+        "wires": [
+            [
+                "b9d0477015d5cf55"
+            ]
+        ]
+    },
+    {
+        "id": "77c4c20d5f97bebb",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "TRẠNG THÁI NÚT NHẤN",
+        "info": "",
+        "x": 370,
+        "y": 6960,
+        "wires": []
+    },
+    {
+        "id": "413ae896c6a4aa58",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "3",
+        "topic": "",
+        "x": 130,
+        "y": 7000,
+        "wires": [
+            [
+                "ee63fe2c2210d53d"
+            ]
+        ]
+    },
+    {
+        "id": "0ca44f81a66b6266",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "function 5",
+        "func": "// Kiểm tra giá trị msg.payload\nif (msg.payload === true) {\n    return msg; // Chỉ gửi đi nếu giá trị là true\n} else {\n    return null; // Không gửi đi nếu giá trị là false\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1160,
+        "y": 7000,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6644c235b55c721f",
+        "type": "remote-access",
+        "z": "36b437ff56e6752c",
+        "confignode": "8e14984f4afe8216",
+        "name": "",
+        "verbose": 0,
+        "x": 500,
+        "y": 740,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "476741ac6b550c8c",
+        "type": "influxdb out",
+        "z": "36b437ff56e6752c",
+        "influxdb": "770b24b6a431d8b0",
+        "name": "4TL",
+        "measurement": "smoke",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 1130,
+        "y": 1540,
+        "wires": []
+    },
+    {
+        "id": "d4ee88c58d35a940",
+        "type": "mqtt-broker",
+        "name": "SEVER TRIEU",
+        "broker": "2c6c85f6618c454cb7bab5216e1f5dff.s1.eu.hivemq.cloud",
+        "port": "8883",
+        "tls": "60051a9b6f4c9124",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "8e14984f4afe8216",
+        "type": "remote-config",
+        "name": "kltn",
+        "host": "localhost",
+        "protocol": "http",
+        "port": "1880",
+        "baseurl": "/ui",
+        "instancehash": "ghtdeo24nsztf9tj1g09o4i4g47uybcr0t0cxsvo4rtowoz0inom2787k39kz1sl",
+        "server": "nodered04.remote-red.com",
+        "region": "de"
+    },
+    {
+        "id": "4237a466dbeb7cee",
+        "type": "ui_group",
+        "name": "Smoke SENSOR",
+        "tab": "68c414792d8157da",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "297fb917525e91db",
+        "type": "ui_group",
+        "name": "Gas SENSOR",
+        "tab": "68c414792d8157da",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "930f43f1f5b51246",
+        "type": "ui_group",
+        "name": "Temperature SENSOR",
+        "tab": "68c414792d8157da",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "0e98a1ce8793f5b7",
+        "type": "ui_group",
+        "name": "Trạng thái thiết bị",
+        "tab": "68c414792d8157da",
+        "order": 4,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "a2a30086580d6884",
+        "type": "ui_group",
+        "name": "Chuông",
+        "tab": "68c414792d8157da",
+        "order": 5,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "d73ddb2002e6764a",
+        "type": "influxdb",
+        "hostname": "192.168.54.185",
+        "port": 8086,
+        "protocol": "http",
+        "database": "temp",
+        "name": "4TL",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://localhost:8086",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "28a6f0529bc505b6",
+        "type": "influxdb",
+        "hostname": "192.168.54.185",
+        "port": 8086,
+        "protocol": "http",
+        "database": "gas",
+        "name": "4TL",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://localhost:8086",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "770b24b6a431d8b0",
+        "type": "influxdb",
+        "hostname": "192.168.54.185",
+        "port": 8086,
+        "protocol": "http",
+        "database": "smoke_sensor",
+        "name": "4TL",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://localhost:8086",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "60051a9b6f4c9124",
+        "type": "tls-config",
+        "name": "",
+        "cert": "",
+        "key": "",
+        "ca": "",
+        "certname": "",
+        "keyname": "",
+        "caname": "",
+        "servername": "",
+        "verifyservercert": true,
+        "alpnprotocol": ""
+    },
+    {
+        "id": "68c414792d8157da",
+        "type": "ui_tab",
+        "name": "KLTN",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]

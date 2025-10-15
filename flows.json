@@ -1,0 +1,380 @@
+[
+    {
+        "id": "8bc87b2b5be6225b",
+        "type": "comment",
+        "z": "36b437ff56e6752c",
+        "name": "Get Access Token",
+        "info": "",
+        "x": 130,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "74a38a5c866405da",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Settings CLICK SETUP TAB",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "flow.set(\"tuya_client_id\", \"ygwytnnecatgmem38jx3\");\nflow.set(\"tuya_user_id\", \"az17422914953382zDLZ\");\nflow.set(\"device_id7\", \"3730340370039f18b018\");",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8591b9f53c1d75fb",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var url = \"https://openapi.tuyaus.com/v1.0/token?grant_type=1\";\nvar t = msg.time;\nvar sign = msg.payload;\nvar client_id  = flow.get(\"tuya_client_id\");\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"sign\": sign.toUpperCase(),\n },\n msg.payload = '';\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 140,
+        "wires": [
+            [
+                "d248fb88e9a87f3d"
+            ]
+        ]
+    },
+    {
+        "id": "d248fb88e9a87f3d",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 890,
+        "y": 140,
+        "wires": [
+            [
+                "90ff89f0b4e7d084",
+                "be46e6d6b4dd108e"
+            ]
+        ]
+    },
+    {
+        "id": "f3b4bbf3991382b4",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "15",
+        "topic": "",
+        "x": 90,
+        "y": 140,
+        "wires": [
+            [
+                "6e6c3d200f75363e"
+            ]
+        ]
+    },
+    {
+        "id": "6e6c3d200f75363e",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var client_id  = flow.get(\"tuya_client_id\");\nvar t = msg.time;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/token?grant_type=1\";\n\n// Couldn't get nodered to process an empty string so this is a hash of an empty file\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 140,
+        "wires": [
+            [
+                "ac08218715d321da"
+            ]
+        ]
+    },
+    {
+        "id": "90ff89f0b4e7d084",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Extract Token from Response",
+        "func": "var data = msg.payload;\nvar access = data.result.access_token;\nvar refresh = data.result.refresh_token;\n\nvar creds ={\n \"access_token\" : access,\n \"refresh_token\" : refresh\n}\nflow.set(\"tuya\", creds);\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1120,
+        "y": 140,
+        "wires": [
+            [
+                "2d2ff3ad85808e2e",
+                "5c2540c656df779e"
+            ]
+        ]
+    },
+    {
+        "id": "2d2ff3ad85808e2e",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.result.access_token",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1360,
+        "y": 120,
+        "wires": [
+            [
+                "05953a4d202b8011"
+            ]
+        ]
+    },
+    {
+        "id": "05953a4d202b8011",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "access token",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1550,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "5c2540c656df779e",
+        "type": "change",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.result.refresh_token",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1360,
+        "y": 180,
+        "wires": [
+            [
+                "929e18d0de06aca3"
+            ]
+        ]
+    },
+    {
+        "id": "929e18d0de06aca3",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "refresh access token",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1580,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "be46e6d6b4dd108e",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 13",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1080,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "ac08218715d321da",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "c2cc6caeec4743eaaf6441d43ff3681f",
+        "x": 470,
+        "y": 140,
+        "wires": [
+            [
+                "8591b9f53c1d75fb"
+            ]
+        ]
+    },
+    {
+        "id": "b9d0477015d5cf55",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "func": "var device_id = flow.get(\"device_id7\");\nvar url = \"https://openapi.tuyaus.com/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar t = msg.time;\nvar method = \"GET\";\nvar client_id  = flow.get(\"tuya_client_id\");\nvar creds = flow.get(\"tuya\");\nvar token = creds.access_token;\nvar sign = msg.payload;\nmsg.headers ={\n \"sign_method\": \"HMAC-SHA256\",\n \"client_id\" : client_id,\n \"t\": t.toString(),\n \"mode\" : \"cors\",\n \"Content-Type\": \"application/json\",\n \"sign\": sign.toUpperCase(),\n \"access_token\" : token\n },\n    msg.payload = { \n      \"status_value\": \"Trang thai\" };\n msg.url = url;\n msg.method = \"GET\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 280,
+        "wires": [
+            [
+                "6244f58a77130105"
+            ]
+        ]
+    },
+    {
+        "id": "6244f58a77130105",
+        "type": "http request",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "method": "use",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 950,
+        "y": 280,
+        "wires": [
+            [
+                "b6a42bc362911f30"
+            ]
+        ]
+    },
+    {
+        "id": "ee63fe2c2210d53d",
+        "type": "function",
+        "z": "36b437ff56e6752c",
+        "name": "Create signStr",
+        "func": "var creds = flow.get(\"tuya\");\nvar access_token = creds.access_token;\nvar device_id = flow.get(\"device_id7\");\nvar t = msg.time;\nvar client_id  = flow.get(\"tuya_client_id\");\nvar token = access_token;\nvar method = \"GET\";\nvar sign_url = \"/v1.0/iot-03/devices/\"+device_id+\"/status\";\nvar content_hash = \"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\";\nvar string_to_sign = method+\"\\n\"+content_hash+\"\\n\"+\"\"+\"\\n\"+sign_url;\nvar signStr = client_id+token+t+string_to_sign;\n\nmsg.payload = signStr;\nmsg.time = msg.time;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 280,
+        "wires": [
+            [
+                "e8200acbf162369f"
+            ]
+        ]
+    },
+    {
+        "id": "413ae896c6a4aa58",
+        "type": "inject",
+        "z": "36b437ff56e6752c",
+        "name": "",
+        "props": [
+            {
+                "p": "time",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "3",
+        "topic": "",
+        "x": 130,
+        "y": 280,
+        "wires": [
+            [
+                "ee63fe2c2210d53d"
+            ]
+        ]
+    },
+    {
+        "id": "e8200acbf162369f",
+        "type": "hmac",
+        "z": "36b437ff56e6752c",
+        "name": "Sign signStr with secret",
+        "algorithm": "HmacSHA256",
+        "key": "c2cc6caeec4743eaaf6441d43ff3681f",
+        "x": 550,
+        "y": 280,
+        "wires": [
+            [
+                "b9d0477015d5cf55"
+            ]
+        ]
+    },
+    {
+        "id": "b6a42bc362911f30",
+        "type": "debug",
+        "z": "36b437ff56e6752c",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1140,
+        "y": 280,
+        "wires": []
+    }
+]
